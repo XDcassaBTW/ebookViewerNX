@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # Using the more reliable devkitpro container path
-    container: devkitpro/devkitswitch:latest
+    container: devkitpro/devkita64:latest
 
     steps:
       - name: Checkout code
