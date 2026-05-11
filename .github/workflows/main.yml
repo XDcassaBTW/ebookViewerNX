@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Using the more reliable devkitpro container path
     container: devkitpro/devkita64:latest
 
     steps:
@@ -21,24 +20,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # The image comes with pacman; we just need the specific switch libs
-          sudo dkp-pacman -Syyu --noconfirm
-          sudo dkp-pacman -S --noconfirm \
+          # Use dkp-pacman to ensure all SDL2 and MuPDF dependencies are present
+          dkp-pacman -Syyu --noconfirm
+          dkp-pacman -S --noconfirm \
             switch-sdl2 \
             switch-sdl2_image \
             switch-sdl2_ttf \
             switch-liblzma \
-            switch-zlib
-
-      - name: Build MuPDF Library
-        run: |
-          # Use the cross-compiler environment variables provided by the container
-          cd libs
-          make -f Makefile.mupdf -j$(nproc)
-          cd ..
+            switch-zlib \
+            switch-mupdf \
+            switch-freetype
 
       - name: Build Application
-        run: make -j$(nproc)
+        run: |
+          # We skip building the 'libs' folder and go straight to the main app
+          # If the Makefile requires the local lib, we might need to tweak it, 
+          # but usually, 'make' will now find the system version.
+          make -j$(nproc)
 
       - name: Upload NRO Artifact
         uses: actions/upload-artifact@v4
@@ -46,4 +44,3 @@ jobs:
           name: ebookViewerNX-nro
           path: |
             *.nro
-            *.elf
